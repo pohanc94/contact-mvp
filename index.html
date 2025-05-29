@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
   <meta charset="UTF-8">
   <title>北美通訊錄查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="container">
     <h1>北美通訊錄</h1>
@@ -23,9 +25,14 @@
       <option value="Toronto">Toronto</option>
     </select>
 
+    <div id="loading">
+      <div class="spinner"></div>
+      載入中...
+    </div>
     <ul id="contact-list"></ul>
   </div>
 
   <script src="script.js"></script>
 </body>
+
 </html>
