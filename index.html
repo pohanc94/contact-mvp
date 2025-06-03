@@ -2,37 +2,40 @@
 <html lang="zh">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>北美通訊錄查詢</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
   <div class="container">
     <h1>北美通訊錄</h1>
-    <label for="region">依地區篩選：</label>
-    <select id="region">
-      <option value="">全部地區</option>
-      <option value="San Francisco">San Francisco</option>
-      <option value="Los Angeles">Los Angeles</option>
-      <option value="New York">New York</option>
-      <option value="Chicago">Chicago</option>
-      <option value="Boston">Boston</option>
-      <option value="Seattle">Seattle</option>
-      <option value="Houston">Houston</option>
-      <option value="Miami">Miami</option>
-      <option value="Vancouver">Vancouver</option>
-      <option value="Toronto">Toronto</option>
-    </select>
 
-    <div id="loading">
-      <div class="spinner"></div>
-      載入中...
+    <!-- 登入畫面 -->
+    <div id="login-screen" class="center-screen">
+      <div id="g_id_onload" data-client_id="348096291737-o4vc5112ar7pi9j5gjluqsr0gjog29pb.apps.googleusercontent.com"
+        data-callback="onGoogleSignIn" data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-size="large"></div>
     </div>
-    <ul id="contact-list"></ul>
-  </div>
 
-  <script src="script.js"></script>
+    <!-- 通訊錄畫面 -->
+    <div id="directory-screen" style="display: none;">
+      <label for="region">依地區篩選：</label>
+      <select id="region">
+        <option value="">全部地區</option>
+      </select>
+
+      <div id="loading">
+        <div class="spinner"></div>
+        載入中...
+      </div>
+
+      <ul id="contact-list"></ul>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>

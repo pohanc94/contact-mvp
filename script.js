@@ -3,22 +3,56 @@ let allContacts = [];
 
 const loadingElement = document.getElementById("loading");
 const listElement = document.getElementById("contact-list");
+const regionSelect = document.getElementById("region");
+const loginScreen = document.getElementById("login-screen");
+const directoryScreen = document.getElementById("directory-screen");
 
-async function fetchAllContacts() {
-  loadingElement.style.display = "block";   // 顯示 loading
-  listElement.style.display = "none";       // 暫時隱藏清單
+function onGoogleSignIn(response) {
+  const idToken = response.credential;
 
-  const res = await fetch(API_URL);
-  allContacts = await res.json();
-  renderContacts(allContacts);
+  // 切換畫面
+  loginScreen.style.display = "none";
+  directoryScreen.style.display = "block";
+  loadingElement.style.display = "block";
+  listElement.innerHTML = "";
 
-  loadingElement.style.display = "none";    // 隱藏 loading
-  listElement.style.display = "block";      // 顯示清單
+  fetch(`${API_URL}?idToken=${idToken}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        alert("無權限：" + data.error);
+        // 回到登入畫面
+        loginScreen.style.display = "flex";
+        directoryScreen.style.display = "none";
+        return;
+      }
+
+      allContacts = data;
+      populateRegionOptions();
+      renderContacts(allContacts);
+    })
+    .catch(err => {
+      alert("錯誤：" + err);
+      // 發生錯誤也回登入畫面
+      loginScreen.style.display = "flex";
+      directoryScreen.style.display = "none";
+    });
+}
+
+function populateRegionOptions() {
+  const uniqueRegions = [...new Set(allContacts.map(c => c["地區"]))].sort();
+  uniqueRegions.forEach(region => {
+    const option = document.createElement("option");
+    option.value = region;
+    option.textContent = region;
+    regionSelect.appendChild(option);
+  });
 }
 
 function renderContacts(list) {
-  const container = document.getElementById("contact-list");
-  container.innerHTML = "";
+  loadingElement.style.display = "none";
+  listElement.innerHTML = "";
+
   list.forEach(contact => {
     const imgIndex = Math.floor(Math.random() * 100);
     const imgGender = Math.random() < 0.5 ? "men" : "women";
@@ -27,7 +61,7 @@ function renderContacts(list) {
     const li = document.createElement("li");
     li.innerHTML = `
       <div class="contact-item">
-        <img src="${imgUrl}" alt="Avatar" class="avatar">
+        <img src="${imgUrl}" alt="Avatar" class="avatar" />
         <div>
           <strong>${contact["姓名"]}</strong><br>
           ${contact["電話"]}<br>
@@ -35,14 +69,12 @@ function renderContacts(list) {
           <em>${contact["地區"]}</em>
         </div>
       </div>`;
-    container.appendChild(li);
+    listElement.appendChild(li);
   });
 }
 
-document.getElementById("region").addEventListener("change", (e) => {
+regionSelect.addEventListener("change", (e) => {
   const region = e.target.value;
   const filtered = region ? allContacts.filter(c => c["地區"] === region) : allContacts;
   renderContacts(filtered);
 });
-
-fetchAllContacts(); // 初始化
