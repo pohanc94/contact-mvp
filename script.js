@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxZDo6ten58nPhw2kFbtkItzDJaEDzlgSuVxilqxmrdiGKIQUAq3KNYJKqaJMAvy0RcDA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzAlsIR-GEDkCKunpjksQESs-VkDbhzaQl935pOq8GbOi4ELQDwBSy4TetaYd-ZrGJYPQ/exec";
 let allContacts = [];
 
 const loadingElement = document.getElementById("loading");
@@ -52,29 +52,42 @@ function populateRegionOptions() {
 function renderContacts(list) {
   loadingElement.style.display = "none";
   listElement.innerHTML = "";
-
   list.forEach(contact => {
-    const imgIndex = Math.floor(Math.random() * 100);
-    const imgGender = Math.random() < 0.5 ? "men" : "women";
-    const imgUrl = `https://randomuser.me/api/portraits/${imgGender}/${imgIndex}.jpg`;
+    const name = contact["中文姓名"] || `${contact["First Name (Preferred)"]} ${contact["Last Name"]}`;
+    const avatar = contact["大頭貼上傳 / Upload Picture"] || `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 10)}.jpg`;
+    const region = contact["地區/Chapter"];
+    const company = contact["公司名稱 / Company Name"];
+    const position = contact["職位 / Position"];
+    const industry = contact["行業 / Industry"];
+    const intro = contact["職業介紹(簡短一句)"];
+    const phone = contact["電話 / Mobile Phone"];
+    const motto = contact["個人標語 / Person Motto\nex. 做自己的太陽，無需借誰的光"];
+    const linkedin = contact["LinkedIn (link)"];
+    const ig = contact["Instagram"];
+    const line = contact["LINE ID"];
 
     const li = document.createElement("li");
     li.innerHTML = `
-      <div class="contact-item">
-        <img src="${imgUrl}" alt="Avatar" class="avatar" />
-        <div>
-          <strong>${contact["姓名"]}</strong><br>
-          ${contact["電話"]}<br>
-          <a href="mailto:${contact["Email"]}">${contact["Email"]}</a><br>
-          <em>${contact["地區"]}</em>
-        </div>
-      </div>`;
+          <div class="contact-item">
+            <img src="${avatar}" alt="Avatar" class="avatar" />
+            <div>
+              <strong>${name}</strong><br>
+              ${position || ""} ‧ ${company || ""} ‧ ${industry || ""}<br>
+              ${phone ? `☎ ${phone}<br>` : ""}
+              ${region ? `<em>${region}</em><br>` : ""}
+              ${intro ? `<i>${intro}</i><br>` : ""}
+              ${motto ? `<q>${motto}</q><br>` : ""}
+              ${linkedin ? `<a href="${linkedin}" target="_blank">LinkedIn</a> ` : ""}
+              ${ig ? `IG: ${ig} ` : ""}
+              ${line ? `LINE: ${line}` : ""}
+            </div>
+          </div>`;
     listElement.appendChild(li);
   });
 }
 
 regionSelect.addEventListener("change", (e) => {
   const region = e.target.value;
-  const filtered = region ? allContacts.filter(c => c["地區"] === region) : allContacts;
+  const filtered = region ? allContacts.filter(c => c["地區/Chapter"] === region) : allContacts;
   renderContacts(filtered);
 });
