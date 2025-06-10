@@ -90,3 +90,18 @@ li {
   justify-content: center;
   height: 60vh;
 }
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.filter-row select,
+.filter-row button {
+  padding: 0.5rem;
+  font-size: 1rem;
+  flex: 1 1 150px;
+  min-width: 100px;
+}

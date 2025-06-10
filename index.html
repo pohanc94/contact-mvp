@@ -22,10 +22,18 @@
 
     <!-- 通訊錄畫面 -->
     <div id="directory-screen" style="display: none;">
-      <label for="region">依地區篩選：</label>
-      <select id="region">
-        <option value="">全部地區</option>
-      </select>
+      <div class="filter-row">
+        <select id="location">
+          <option value="">Location</option>
+        </select>
+        <select id="industry1">
+          <option value="">Industry-1</option>
+        </select>
+        <select id="industry2">
+          <option value="">Industry-2</option>
+        </select>
+        <button id="reset-button">重設</button>
+      </div>
 
       <div id="loading">
         <div class="spinner"></div>
@@ -34,6 +42,7 @@
 
       <ul id="contact-list"></ul>
     </div>
+
 
     <script src="script.js"></script>
 </body>

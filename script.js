@@ -3,9 +3,12 @@ let allContacts = [];
 
 const loadingElement = document.getElementById("loading");
 const listElement = document.getElementById("contact-list");
-const regionSelect = document.getElementById("region");
+const locationSelect = document.getElementById("location");
+const industry1Select = document.getElementById("industry1");
+const industry2Select = document.getElementById("industry2");
 const loginScreen = document.getElementById("login-screen");
 const directoryScreen = document.getElementById("directory-screen");
+const resetButton = document.getElementById("reset-button");
 
 function onGoogleSignIn(response) {
   const idToken = response.credential;
@@ -24,7 +27,12 @@ function onGoogleSignIn(response) {
         return;
       }
       allContacts = data;
-      populateRegionOptions();
+
+      // 初次填充下拉選單
+      populateSelectOptions(locationSelect, "Location");
+      populateSelectOptions(industry1Select, "Industry-1");
+      populateSelectOptions(industry2Select, "Industry-2");
+
       renderContacts(allContacts);
     })
     .catch(err => {
@@ -34,19 +42,89 @@ function onGoogleSignIn(response) {
     });
 }
 
+function populateSelectOptions(selectElement, key) {
+  selectElement.options.length = 1; // 清除除了第一個 "全部"
+  const values = [...new Set(allContacts.map(c => c[key]).filter(Boolean))].sort();
+  values.forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    selectElement.appendChild(option);
+  });
+}
+
+function applyFilters() {
+  const location = locationSelect.value;
+  const industry1 = industry1Select.value;
+  const industry2 = industry2Select.value;
+
+  const filtered = allContacts.filter(c =>
+    (!location || c["Location"] === location) &&
+    (!industry1 || c["Industry-1"] === industry1) &&
+    (!industry2 || c["Industry-2"] === industry2)
+  );
+
+  renderContacts(filtered);
+}
+
+function resetFilters() {
+  locationSelect.value = "";
+  industry1Select.value = "";
+  industry2Select.value = "";
+
+  // 重建三個選單
+  populateSelectOptions(locationSelect, "Location");
+  populateSelectOptions(industry1Select, "Industry-1");
+  populateSelectOptions(industry2Select, "Industry-2");
+
+  renderContacts(allContacts);
+}
+
+function updateDependentFilters(changedKey) {
+  const currentValues = {
+    "Location": locationSelect.value,
+    "Industry-1": industry1Select.value,
+    "Industry-2": industry2Select.value,
+  };
+
+  const filtered = allContacts.filter(c =>
+    (!currentValues["Location"] || c["Location"] === currentValues["Location"]) &&
+    (!currentValues["Industry-1"] || c["Industry-1"] === currentValues["Industry-1"]) &&
+    (!currentValues["Industry-2"] || c["Industry-2"] === currentValues["Industry-2"])
+  );
+
+  const otherKeys = ["Location", "Industry-1", "Industry-2"].filter(k => k !== changedKey);
+  const selects = {
+    "Location": locationSelect,
+    "Industry-1": industry1Select,
+    "Industry-2": industry2Select,
+  };
+
+  otherKeys.forEach(key => {
+    const select = selects[key];
+    const prevValue = select.value;
+
+    select.options.length = 1;
+    const values = [...new Set(filtered.map(c => c[key]).filter(Boolean))].sort();
+    values.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+
+    // 如果舊值不在新選項裡，清空
+    if (prevValue && !values.includes(prevValue)) {
+      select.value = "";
+    } else {
+      select.value = prevValue;
+    }
+  });
+}
+
 function extractFileId(url) {
   const match = url.match(/id=([^&]+)/) || url.match(/\/file\/d\/([^/]+)\//);
   return match ? match[1] : null;
-}
-
-function populateRegionOptions() {
-  const uniqueRegions = [...new Set(allContacts.map(c => c["地區/Chapter"]))].sort();
-  uniqueRegions.forEach(region => {
-    const option = document.createElement("option");
-    option.value = region;
-    option.textContent = region;
-    regionSelect.appendChild(option);
-  });
 }
 
 function renderContacts(list) {
@@ -73,7 +151,7 @@ function renderContacts(list) {
     const img = document.createElement("img");
     img.alt = "Avatar";
     img.className = "avatar";
-    img.src = "guest.png"; // 預設圖片
+    img.src = "guest.png";
 
     if (fileId) {
       fetch(`${API_URL}?fileId=${fileId}`)
@@ -96,7 +174,7 @@ function renderContacts(list) {
       ${region ? `<em>${region}</em><br>` : ""}
       ${intro ? `<i>${intro}</i><br>` : ""}
       ${motto ? `<q>${motto}</q><br>` : ""}
-      ${linkedin ? `<a href=\"${linkedin}\" target=\"_blank\">LinkedIn</a> ` : ""}
+      ${linkedin ? `<a href="${linkedin}" target="_blank">LinkedIn</a> ` : ""}
       ${ig ? `IG: ${ig} ` : ""}
       ${line ? `LINE: ${line}` : ""}
     `;
@@ -108,8 +186,20 @@ function renderContacts(list) {
   });
 }
 
-regionSelect.addEventListener("change", (e) => {
-  const region = e.target.value;
-  const filtered = region ? allContacts.filter(c => c["地區/Chapter"] === region) : allContacts;
-  renderContacts(filtered);
+// 綁定事件
+locationSelect.addEventListener("change", () => {
+  updateDependentFilters("Location");
+  applyFilters();
 });
+
+industry1Select.addEventListener("change", () => {
+  updateDependentFilters("Industry-1");
+  applyFilters();
+});
+
+industry2Select.addEventListener("change", () => {
+  updateDependentFilters("Industry-2");
+  applyFilters();
+});
+
+resetButton.addEventListener("click", resetFilters);
