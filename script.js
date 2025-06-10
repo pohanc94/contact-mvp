@@ -24,6 +24,7 @@ function onGoogleSignIn(response) {
     .then(data => {
       if (data.error) {
         alert("無權限：" + data.error);
+        window.location.reload();
         return;
       }
       allContacts = data;
@@ -34,7 +35,8 @@ function onGoogleSignIn(response) {
       renderContacts(allContacts);
     })
     .catch(err => {
-      alert("錯誤：" + err);
+      alert("登入錯誤，請重新整理後再試\n" + err);
+      window.location.reload();
     });
 }
 
